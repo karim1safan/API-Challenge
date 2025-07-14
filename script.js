@@ -1,24 +1,10 @@
 function getPosts(userId) {
-  const xhr = new XMLHttpRequest();
-
-  xhr.open(
-    "GET",
-    "https://jsonplaceholder.typicode.com/posts?userId=" + userId
-  );
-
-  xhr.send();
-
-  // console.log(xhr);
-
-  xhr.onload = function () {
-    if (xhr.status >= 200 && xhr.status < 300) {
-      // console.log(xhr.responseText);
-
-      const data = JSON.parse(xhr.responseText);
-
-      // console.log(data);
-
-      // Clear previous posts before adding new ones
+  fetch("https://jsonplaceholder.typicode.com/posts?userId=" + userId)
+    .then((response) => {
+      if (!response.ok) throw new Error("ERROR!");
+      return response.json();
+    })
+    .then((data) => {
       document.getElementById("posts").innerHTML = "";
 
       data.forEach((post) => {
@@ -31,31 +17,20 @@ function getPosts(userId) {
           </div>
         `;
       });
-    } else {
-      alert("ERROR!");
-    }
-  };
+    });
 }
 
 function getUsers() {
-  const xhr = new XMLHttpRequest();
-
-  xhr.open("GET", "https://jsonplaceholder.typicode.com/users?user");
-
-  xhr.send();
-
-  // console.log(xhr);
-
-  xhr.onload = function () {
-    if (xhr.status >= 200 && xhr.status < 300) {
-      // console.log(xhr.responseText);
-
-      const data = JSON.parse(xhr.responseText);
-
-      // console.log(data);
-
-      data.forEach((user) => {
-        document.getElementById("users").innerHTML += `
+  return new Promise((resolve, reject) => {
+    fetch("https://jsonplaceholder.typicode.com/users")
+      .then((response) => {
+        if (!response.ok) throw new Error("ERROR!");
+        return response.json();
+      })
+      .then((users) => {
+        document.getElementById("users").innerHTML = "";
+        users.forEach((user) => {
+          document.getElementById("users").innerHTML += `
           <div class="user" onClick="userClicked(${user.id}, this)">
             <h3>${user.name}</h3>
             <p>
@@ -63,15 +38,15 @@ function getUsers() {
             </p>
           </div>
         `;
+        });
       });
-    } else {
-      alert("ERROR!");
-    }
-  };
+    resolve();
+  });
 }
 
-getPosts(1);
-getUsers();
+getUsers().then(() => {
+  getPosts(1);
+});
 
 function userClicked(id, currentElement) {
   getPosts(id);
